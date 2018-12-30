@@ -32,15 +32,18 @@ export class MainScene extends Phaser.Scene {
       this.lines[i].setFixedCollision();
       this.lines[i].debugShowBody = false;
     }
-    let b = this.impact.add.body(Math.random() * this.width, Math.random() * this.height, 1, 1);
-    this.explosion(464, 450, 10);
-    b.setActiveCollision();
-    b.setVelocity(300, 150);
-    b.setCollideCallback(() => {
-      let pos = <{ x: number , y: number }>b.body.pos;
-      this.explosion(pos.x, this.height - pos.y, 20);
-      b.body.destroy()
-    }, null);
+
+    let _this = this;
+    this.input.on('pointerup', function (pointer) {
+      let b = this.impact.add.body(pointer.x, pointer.y, 4, 4);
+      b.setActiveCollision();
+      b.setVelocity(300, 150);
+      b.setCollideCallback((bodyA, bodyB, axis) => {
+        let pos = <{ x: number , y: number }>b.body.pos;
+        _this.explosion(pos.x, 20);
+        b.body.destroy()
+      }, this);
+    }, this);
   }
 
   bresenhamCircle(xc: number, yc: number ,r:number ): void {
@@ -70,7 +73,7 @@ export class MainScene extends Phaser.Scene {
   setLine(x, height) {
     x = parseInt(x);
     height = parseInt(height);
-    if (x < 0 || x > this.width)
+    if (x < 0 || x >= this.width)
       return;
     let body = this.lines[x];
     let size = <{ x: number, y: number }>body.body.size;
@@ -89,14 +92,17 @@ export class MainScene extends Phaser.Scene {
     let body = this.lines[x];
     let size = <{ x: number, y: number }>body.body.size;
     let pos = <{ x: number, y: number }>body.body.pos;
-    if (height < size.y) {
+    if (height <= size.y) {
       body.setBodySize(size.x, size.y - height);
       (<{ x: number, y: number }>body.body.pos).y += height;
     }
   }
 
-  explosion(x: number, y:number, radius:number) {
-    this.bresenhamCircle(x, y, radius);
+  explosion(x: number, radius:number) {
+    x = parseInt(x.toString());
+    if (x < 0 || x >= this.width)
+      return;
+    this.bresenhamCircle(x, (<{ x: number, y: number }>this.lines[x].body.pos).y, radius);
   }
 
   update(time: number, delta: number): void {
