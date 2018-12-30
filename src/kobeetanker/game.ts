@@ -9,9 +9,11 @@ const config: GameConfig = {
   parent: "game",
   scene: MainScene,
   physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { y: 200 }
+    default: 'impact',
+    impact: {
+      gravity: 300,
+      maxVelocity: 800,
+      debug: true
     }
   }
 };
