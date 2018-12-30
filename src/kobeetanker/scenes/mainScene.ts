@@ -44,10 +44,11 @@ export class MainScene extends Phaser.Scene {
   }
 
   bresenhamCircle(xc: number, yc: number ,r:number ): void {
+    let lowests = new Array<number>(r);
     let x, y, p;
     x = 0;
     y = r;
-    this.reduceLine(xc+x,yc-y);
+    lowests[xc + x] = yc - y;
     p = 3 - (2 * r);
     for (x = 0; x <= y; x++) {
       if (p < 0) {
@@ -56,10 +57,13 @@ export class MainScene extends Phaser.Scene {
         y -= 1;
         p += ((4 * (x - y) + 10));
       }
-      this.reduceLine(xc+x,yc-y);
-      this.reduceLine(xc-x,yc-y);
-      this.reduceLine(xc+y,yc-x);
-      this.reduceLine(xc-y,yc-x);
+      lowests[xc + x] = y;
+      lowests[xc - x] = y;
+    }
+    for (let i = 0; i < lowests.length; ++i) {
+      if (lowests[i] != 0) {
+        this.reduceLine(i, lowests[i]);
+      }
     }
   }
 
@@ -86,8 +90,8 @@ export class MainScene extends Phaser.Scene {
     let size = <{ x: number, y: number }>body.body.size;
     let pos = <{ x: number, y: number }>body.body.pos;
     if (height < size.y) {
-      body.setBodySize(size.x, height);
-      (<{ x: number, y: number }>body.body.pos).y = this.height - height;
+      body.setBodySize(size.x, size.y - height);
+      (<{ x: number, y: number }>body.body.pos).y += height;
     }
   }
 
